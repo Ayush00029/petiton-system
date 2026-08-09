@@ -41,11 +41,10 @@ const registerUser = async (req, res) => {
             otpExpire
         });
 
-        // Send real OTP email via Gmail SMTP
-        const emailRes = await sendOtpEmail(user.email, otp);
-        if (!emailRes.success) {
-            console.warn("Gmail Send Warning:", emailRes.error);
-        }
+        // Send real OTP email via pooled Gmail SMTP in background (non-blocking for instant response)
+        sendOtpEmail(user.email, otp).catch((err) => {
+            console.error("Background Gmail OTP send error:", err);
+        });
 
         res.status(201).json({
             success: true,
@@ -92,8 +91,10 @@ const loginUser = async (req, res) => {
             user.otpExpire = new Date(Date.now() + 10 * 60 * 1000);
             await user.save();
 
-            // Send real Gmail OTP
-            await sendOtpEmail(user.email, otp);
+            // Send real Gmail OTP in background (non-blocking for instant response)
+            sendOtpEmail(user.email, otp).catch((err) => {
+                console.error("Background Gmail OTP login send error:", err);
+            });
 
             res.json({
                 success: true,
@@ -169,7 +170,10 @@ const resendOtp = async (req, res) => {
         user.otpExpire = new Date(Date.now() + 10 * 60 * 1000);
         await user.save();
 
-        await sendOtpEmail(user.email, otp);
+        // Send real Gmail OTP in background (non-blocking for instant response)
+        sendOtpEmail(user.email, otp).catch((err) => {
+            console.error("Background Gmail OTP resend error:", err);
+        });
 
         res.json({
             success: true,

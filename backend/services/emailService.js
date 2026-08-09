@@ -1,12 +1,15 @@
 const nodemailer = require("nodemailer");
 
-// Create Nodemailer Transporter for Gmail (Port 465 SSL)
-const createTransporter = () => {
-    if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
-        return nodemailer.createTransport({
-            host: "smtp.gmail.com",
-            port: 465,
-            secure: true,
+// Cached pooled Transporter for fast high-performance Gmail sending
+let cachedTransporter = null;
+
+const getTransporter = () => {
+    if (!cachedTransporter && process.env.EMAIL_USER && process.env.EMAIL_PASS) {
+        cachedTransporter = nodemailer.createTransport({
+            service: "gmail",
+            pool: true,
+            maxConnections: 5,
+            maxMessages: 100,
             auth: {
                 user: process.env.EMAIL_USER,
                 pass: process.env.EMAIL_PASS
@@ -16,12 +19,12 @@ const createTransporter = () => {
             }
         });
     }
-    return null;
+    return cachedTransporter;
 };
 
 // Send OTP Verification Email Handler
 const sendOtpEmail = async (email, otp) => {
-    const transporter = createTransporter();
+    const transporter = getTransporter();
 
     if (!transporter) {
         console.log("==================================================");
