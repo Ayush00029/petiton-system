@@ -6,7 +6,7 @@ const RegisterPage = () => {
   const { register } = useAuth();
   const navigate = useNavigate();
 
-  const [formData, setFormData] = useState({ name: '', email: '', password: '', role: 'citizen' });
+  const [formData, setFormData] = useState({ name: '', email: '', password: '' });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -79,18 +79,7 @@ const RegisterPage = () => {
             />
           </div>
 
-          <div>
-            <label className="block font-bold text-slate-700 mb-1 uppercase tracking-wider">Role</label>
-            <select
-              name="role"
-              value={formData.role}
-              onChange={handleChange}
-              className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold focus:ring-2 focus:ring-[#F97316] focus:outline-none"
-            >
-              <option value="citizen">Citizen</option>
-              <option value="admin">Admin</option>
-            </select>
-          </div>
+
 
           <button
             type="submit"

@@ -26,7 +26,8 @@ const registerUser = async (req, res) => {
             return res.status(400).json({ success: false, message: "User already exists" });
         }
 
-        const userRole = role === "admin" ? "admin" : "citizen";
+        // All public registrations are strictly registered as citizen
+        const userRole = "citizen";
         const otp = generateOtp();
         const otpExpire = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
 
