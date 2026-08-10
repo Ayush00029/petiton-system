@@ -42,7 +42,11 @@ const registerUser = async (req, res) => {
         });
 
         // Send real OTP email via pooled Gmail SMTP in background (non-blocking for instant response)
-        sendOtpEmail(user.email, otp).catch((err) => {
+        sendOtpEmail(user.email, otp).then((emailRes) => {
+            if (!emailRes.success) {
+                console.error(`⚠️ Gmail delivery attempt to ${user.email} failed:`, emailRes.error);
+            }
+        }).catch((err) => {
             console.error("Background Gmail OTP send error:", err);
         });
 
@@ -92,7 +96,11 @@ const loginUser = async (req, res) => {
             await user.save();
 
             // Send real Gmail OTP in background (non-blocking for instant response)
-            sendOtpEmail(user.email, otp).catch((err) => {
+            sendOtpEmail(user.email, otp).then((emailRes) => {
+                if (!emailRes.success) {
+                    console.error(`⚠️ Gmail delivery attempt to ${user.email} failed:`, emailRes.error);
+                }
+            }).catch((err) => {
                 console.error("Background Gmail OTP login send error:", err);
             });
 
@@ -171,7 +179,11 @@ const resendOtp = async (req, res) => {
         await user.save();
 
         // Send real Gmail OTP in background (non-blocking for instant response)
-        sendOtpEmail(user.email, otp).catch((err) => {
+        sendOtpEmail(user.email, otp).then((emailRes) => {
+            if (!emailRes.success) {
+                console.error(`⚠️ Gmail delivery attempt to ${user.email} failed:`, emailRes.error);
+            }
+        }).catch((err) => {
             console.error("Background Gmail OTP resend error:", err);
         });
 
@@ -179,6 +191,7 @@ const resendOtp = async (req, res) => {
             success: true,
             message: "A new verification code has been sent to your Gmail inbox."
         });
+
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
     }

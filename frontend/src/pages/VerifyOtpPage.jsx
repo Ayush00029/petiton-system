@@ -90,7 +90,7 @@ const VerifyOtpPage = () => {
         <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl text-amber-900 text-[11px] leading-relaxed flex items-start space-x-2">
           <AlertCircle className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
           <div>
-            <strong>Gmail Speed Tip:</strong> If you don't see the code in 5-10 seconds, please check your <strong>Spam / Junk</strong> or <strong>Promotions</strong> folder, or pull down to refresh Gmail.
+            <strong>Gmail Location Tip:</strong> If you don't see the code in 5-10 seconds, check your <strong>Spam / Junk</strong> or <strong>Promotions / Updates</strong> folder, or pull down to refresh Gmail.
           </div>
         </div>
 
