@@ -1,8 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { verifyOtp, resendOtp } from '../services/authService';
 import { useAuth } from '../context/AuthContext';
-import { Mail, RefreshCw } from 'lucide-react';
+import { Mail, RefreshCw, AlertCircle } from 'lucide-react';
 
 const VerifyOtpPage = () => {
   const location = useLocation();
@@ -14,8 +14,19 @@ const VerifyOtpPage = () => {
   const [otp, setOtp] = useState('');
   const [loading, setLoading] = useState(false);
   const [resending, setResending] = useState(false);
+  const [cooldown, setCooldown] = useState(30);
   const [error, setError] = useState('');
   const [msg, setMsg] = useState('');
+
+  useEffect(() => {
+    let timer;
+    if (cooldown > 0) {
+      timer = setInterval(() => {
+        setCooldown((prev) => prev - 1);
+      }, 1000);
+    }
+    return () => clearInterval(timer);
+  }, [cooldown]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -43,6 +54,8 @@ const VerifyOtpPage = () => {
   };
 
   const handleResend = async () => {
+    if (cooldown > 0 || resending) return;
+
     setResending(true);
     setError('');
     setMsg('');
@@ -50,7 +63,8 @@ const VerifyOtpPage = () => {
     try {
       const res = await resendOtp(targetEmail);
       if (res.success) {
-        setMsg('A new verification code has been sent to your Gmail inbox.');
+        setMsg('A new verification code has been dispatched to your Gmail inbox.');
+        setCooldown(30);
       }
     } catch (err) {
       setError(err.message || 'Failed to resend verification code');
@@ -71,9 +85,13 @@ const VerifyOtpPage = () => {
             We sent a 6-digit verification code to your Gmail:{' '}
             <strong className="text-slate-900 block pt-1 text-sm">{targetEmail || 'your email'}</strong>
           </p>
-          <p className="text-[11px] text-slate-400">
-            Please check your Gmail inbox (or Spam folder) for the verification code.
-          </p>
+        </div>
+
+        <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl text-amber-900 text-[11px] leading-relaxed flex items-start space-x-2">
+          <AlertCircle className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
+          <div>
+            <strong>Gmail Speed Tip:</strong> If you don't see the code in 5-10 seconds, please check your <strong>Spam / Junk</strong> or <strong>Promotions</strong> folder, or pull down to refresh Gmail.
+          </div>
         </div>
 
         {error && <div className="p-3.5 bg-red-50 text-red-600 text-xs font-semibold rounded-xl border border-red-200">{error}</div>}
@@ -109,11 +127,17 @@ const VerifyOtpPage = () => {
           <button
             type="button"
             onClick={handleResend}
-            disabled={resending}
-            className="font-bold text-[#2563EB] hover:underline flex items-center space-x-1"
+            disabled={resending || cooldown > 0}
+            className="font-bold text-[#2563EB] hover:underline flex items-center space-x-1 disabled:opacity-50 disabled:no-underline"
           >
             <RefreshCw className={`w-3 h-3 ${resending ? 'animate-spin' : ''}`} />
-            <span>{resending ? 'Sending...' : 'Resend Code'}</span>
+            <span>
+              {resending
+                ? 'Sending...'
+                : cooldown > 0
+                ? `Resend in ${cooldown}s`
+                : 'Resend Code'}
+            </span>
           </button>
         </div>
       </div>
@@ -122,3 +146,4 @@ const VerifyOtpPage = () => {
 };
 
 export default VerifyOtpPage;
+

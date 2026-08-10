@@ -6,10 +6,16 @@ let cachedTransporter = null;
 const getTransporter = () => {
     if (!cachedTransporter && process.env.EMAIL_USER && process.env.EMAIL_PASS) {
         cachedTransporter = nodemailer.createTransport({
-            service: "gmail",
+            host: "smtp.gmail.com",
+            port: 465,
+            secure: true, // Direct SSL/TLS socket (faster than 587 STARTTLS upgrade)
             pool: true,
             maxConnections: 5,
             maxMessages: 100,
+            rateLimit: 10,
+            connectionTimeout: 10000, // 10s connection timeout
+            greetingTimeout: 5000,    // 5s greeting timeout
+            socketTimeout: 10000,      // 10s socket timeout
             auth: {
                 user: process.env.EMAIL_USER,
                 pass: process.env.EMAIL_PASS
@@ -38,6 +44,14 @@ const sendOtpEmail = async (email, otp) => {
         from: `"iPetitions Platform" <${process.env.EMAIL_USER}>`,
         to: email,
         subject: "iPetitions - Your 6-Digit Email Verification Code",
+        priority: "high",
+        headers: {
+            "X-Priority": "1 (Highest)",
+            "X-MSMail-Priority": "High",
+            "Importance": "high",
+            "X-Auto-Response-Suppress": "OOF, AutoReply"
+        },
+        text: `Your iPetitions verification code is: ${otp}. This code is valid for 10 minutes. If you did not request this code, please ignore this email.`,
         html: `
             <div style="font-family: 'Helvetica Neue', Arial, sans-serif; max-width: 500px; margin: 0 auto; padding: 24px; border: 1px solid #e2e8f0; border-radius: 16px; background-color: #ffffff;">
                 <div style="text-align: center; margin-bottom: 20px;">
@@ -71,3 +85,4 @@ const sendOtpEmail = async (email, otp) => {
 module.exports = {
     sendOtpEmail
 };
+
