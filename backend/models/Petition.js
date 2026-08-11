@@ -34,6 +34,14 @@ const petitionSchema = new mongoose.Schema(
             ref: "User",
             required: true
         },
+        targetVotes: {
+            type: Number,
+            default: 100
+        },
+        voteCount: {
+            type: Number,
+            default: 0
+        },
         targetSignatures: {
             type: Number,
             default: 100

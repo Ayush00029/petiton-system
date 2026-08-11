@@ -42,9 +42,9 @@ const PetitionCard = ({ petition, showStatus = false }) => {
   if (!petition) return null;
 
   const style = CATEGORY_STYLES[petition.category] || CATEGORY_STYLES.Other;
-  const targetGoal = petition.targetSignatures || 100;
-  const currentSigs = petition.signatureCount || 0;
-  const percentage = Math.min(100, Math.round((currentSigs / targetGoal) * 100));
+  const targetGoal = petition.targetVotes ?? petition.targetSignatures ?? 100;
+  const currentVotes = petition.voteCount ?? petition.signatureCount ?? 0;
+  const percentage = Math.min(100, Math.round((currentVotes / targetGoal) * 100));
 
   return (
     <div
@@ -72,7 +72,7 @@ const PetitionCard = ({ petition, showStatus = false }) => {
 
       {/* Location, Progress & Link */}
       <div className="border-t border-[#E2E8F0] pt-4 space-y-3">
-        {/* Location & Signature Count */}
+        {/* Location & Vote Count */}
         <div className="flex items-center justify-between text-xs text-[#64748B]">
           <span className="flex items-center font-medium truncate max-w-[140px]" title={petition.location}>
             <MapPin className="w-3.5 h-3.5 mr-1 text-[#64748B] flex-shrink-0" />
@@ -80,7 +80,7 @@ const PetitionCard = ({ petition, showStatus = false }) => {
           </span>
           <span className="flex items-center font-bold text-[#0F172A]">
             <Users className="w-3.5 h-3.5 mr-1 text-[#2563EB] flex-shrink-0" />
-            {currentSigs} / {targetGoal} signatures
+            {currentVotes} / {targetGoal} votes
           </span>
         </div>
 

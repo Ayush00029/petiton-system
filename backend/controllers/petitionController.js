@@ -1,20 +1,21 @@
 const Petition = require("../models/Petition");
-const Signature = require("../models/Signature");
+const Vote = require("../models/Vote");
 
 // Citizen: Create a new petition (Default status: pending, Minimum Target: 5)
 const createPetition = async (req, res) => {
     try {
-        const { title, description, category, location, targetSignatures } = req.body;
+        const { title, description, category, location, targetSignatures, targetVotes } = req.body;
 
         if (!title || !description || !category || !location) {
             return res.status(400).json({ success: false, message: "Please fill all required fields" });
         }
 
-        const parsedTarget = Number(targetSignatures);
+        const rawTarget = targetVotes || targetSignatures;
+        const parsedTarget = Number(rawTarget);
         if (isNaN(parsedTarget) || parsedTarget < 5) {
             return res.status(400).json({
                 success: false,
-                message: "Target signatures must be at least 5 for a civic petition"
+                message: "Target votes must be at least 5 for a civic petition"
             });
         }
 
@@ -23,6 +24,7 @@ const createPetition = async (req, res) => {
             description,
             category,
             location,
+            targetVotes: parsedTarget,
             targetSignatures: parsedTarget,
             createdBy: req.user._id,
             status: "pending"
@@ -91,11 +93,13 @@ const pushToGovernment = async (req, res) => {
         }
 
         const isAdmin = req.user.role === "admin";
+        const currentCount = petition.voteCount || petition.signatureCount || 0;
+        const targetGoal = petition.targetVotes || petition.targetSignatures || 5;
 
-        if (!isAdmin && petition.signatureCount < petition.targetSignatures) {
+        if (!isAdmin && currentCount < targetGoal) {
             return res.status(400).json({
                 success: false,
-                message: `Signature goal not reached. Requires ${petition.targetSignatures} signatures (currently ${petition.signatureCount}).`
+                message: `Vote goal not reached. Requires ${targetGoal} votes (currently ${currentCount}).`
             });
         }
 
@@ -167,7 +171,7 @@ const deletePetitionAdmin = async (req, res) => {
         }
 
         await petition.deleteOne();
-        await Signature.deleteMany({ petitionId: req.params.id });
+        await Vote.deleteMany({ petitionId: req.params.id });
 
         res.json({ success: true, message: "Petition deleted successfully" });
     } catch (error) {

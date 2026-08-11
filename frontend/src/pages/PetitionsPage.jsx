@@ -59,13 +59,17 @@ const PetitionsPage = () => {
       return true;
     })
     .sort((a, b) => {
-      if (sortBy === 'most_signed') {
-        return (b.signatureCount || 0) - (a.signatureCount || 0);
+      if (sortBy === 'most_voted') {
+        const countA = a.voteCount ?? a.signatureCount ?? 0;
+        const countB = b.voteCount ?? b.signatureCount ?? 0;
+        return countB - countA;
       }
       if (sortBy === 'closest_goal') {
-        const pctA = (a.signatureCount || 0) / (a.targetSignatures || 1);
-        const pctB = (b.signatureCount || 0) / (b.targetSignatures || 1);
-        return pctB - pctA;
+        const countA = a.voteCount ?? a.signatureCount ?? 0;
+        const targetA = a.targetVotes ?? a.targetSignatures ?? 1;
+        const countB = b.voteCount ?? b.signatureCount ?? 0;
+        const targetB = b.targetVotes ?? b.targetSignatures ?? 1;
+        return countB / targetB - countA / targetA;
       }
       // Default: newest
       return new Date(b.createdAt) - new Date(a.createdAt);
@@ -78,7 +82,7 @@ const PetitionsPage = () => {
         <div className="space-y-2 text-center max-w-2xl mx-auto">
           <h1 className="text-3xl sm:text-4xl font-extrabold text-[#0F172A]">Explore Approved Petitions</h1>
           <p className="text-xs sm:text-sm text-[#64748B]">
-            Browse verified civic petitions in your area, search by keywords, and add your verified signature to create change.
+            Browse civic petitions in your area, search by keywords, and upvote to create change.
           </p>
         </div>
 
@@ -113,7 +117,7 @@ const PetitionsPage = () => {
               className="w-full sm:w-auto px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-[#0F172A] focus:outline-none focus:ring-2 focus:ring-[#2563EB]"
             >
               <option value="newest">Sort: Newest First</option>
-              <option value="most_signed">Sort: Most Signed</option>
+              <option value="most_voted">Sort: Most Voted</option>
               <option value="closest_goal">Sort: Closest to Goal</option>
             </select>
           </div>

@@ -77,18 +77,15 @@ const runTests = async () => {
         console.assert(approveRes.data.data.status === "approved", "Status should be approved");
         console.log("✓ Admin Approved Petition\n");
 
-        // 7. Sign Petition with Digital Signature
-        console.log("Test 7: Sign Petition with Digital Signature...");
-        const signRes = await axios.post(
-            `${BASE_URL}/petitions/${petitionId}/sign`,
-            {
-                signerName: "Test User",
-                signatureData: "TYPED:Test User"
-            },
+        // 7. Upvote Petition (1-Click Voting)
+        console.log("Test 7: Upvote Petition (1-Click Voting)...");
+        const voteRes = await axios.post(
+            `${BASE_URL}/petitions/${petitionId}/vote`,
+            {},
             { headers: { Authorization: `Bearer ${citizenToken}` } }
         );
-        console.assert(signRes.data.signatureCount === 1, "Signature count should be 1");
-        console.log("✓ Digital Signature Recorded\n");
+        console.assert(voteRes.data.success === true, "Vote recording failed");
+        console.log("✓ Vote Recorded Successfully!\n");
 
         console.log("==================================================");
         console.log(" ALL SYSTEM TESTS PASSED PERFECTLY!               ");

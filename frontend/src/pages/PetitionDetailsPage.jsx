@@ -2,21 +2,20 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import {
   getPetitionById,
-  signPetition,
-  revokeSignature,
+  votePetition,
+  unvotePetition,
   pushToGovernment,
-  checkSignatureStatus
+  checkVoteStatus
 } from '../services/petitionService';
 import { useAuth } from '../context/AuthContext';
 import PetitionStatusBadge from '../components/PetitionStatusBadge';
-import DigitalSignatureModal from '../components/DigitalSignatureModal';
 import {
   MapPin,
   Users,
   Calendar,
   User,
   AlertCircle,
-  PenTool,
+  ThumbsUp,
   ShieldCheck,
   Share2,
   Building2,
@@ -31,13 +30,10 @@ const PetitionDetailsPage = () => {
   const { user, isAuthenticated } = useAuth();
 
   const [petition, setPetition] = useState(null);
-  const [hasSigned, setHasSigned] = useState(false);
-  const [signatureInfo, setSignatureInfo] = useState(null);
-  const [showSigModal, setShowSigModal] = useState(false);
+  const [hasVoted, setHasVoted] = useState(false);
 
   const [loading, setLoading] = useState(true);
-  const [signing, setSigning] = useState(false);
-  const [revoking, setRevoking] = useState(false);
+  const [voting, setVoting] = useState(false);
   const [pushing, setPushing] = useState(false);
   const [error, setError] = useState('');
   const [msg, setMsg] = useState('');
@@ -51,12 +47,9 @@ const PetitionDetailsPage = () => {
       }
 
       if (isAuthenticated) {
-        const sigRes = await checkSignatureStatus(id);
-        if (sigRes.success) {
-          setHasSigned(sigRes.hasSigned);
-          if (sigRes.signature) {
-            setSignatureInfo(sigRes.signature);
-          }
+        const voteRes = await checkVoteStatus(id);
+        if (voteRes.success) {
+          setHasVoted(voteRes.hasVoted);
         }
       }
     } catch (err) {
@@ -70,61 +63,44 @@ const PetitionDetailsPage = () => {
     fetchDetails();
   }, [id, isAuthenticated]);
 
-  const handleOpenSigModal = () => {
+  const handleToggleVote = async () => {
     if (!isAuthenticated) {
       navigate('/login');
       return;
     }
-    setShowSigModal(true);
-  };
 
-  const handleDigitalSignatureSubmit = async ({ signerName, signatureData }) => {
-    setShowSigModal(false);
-    setSigning(true);
+    setVoting(true);
     setError('');
     setMsg('');
 
     try {
-      const res = await signPetition(id, { signerName, signatureData });
-      if (res.success) {
-        setHasSigned(true);
-        setSignatureInfo(res.signature);
-        setPetition((prev) => ({
-          ...prev,
-          signatureCount: res.signatureCount
-        }));
-        setMsg('Thank you! Your verified Digital Signature has been recorded.');
+      if (hasVoted) {
+        const res = await unvotePetition(id);
+        if (res.success) {
+          setHasVoted(false);
+          setPetition((prev) => ({
+            ...prev,
+            voteCount: res.voteCount,
+            signatureCount: res.signatureCount
+          }));
+          setMsg('Your vote has been removed.');
+        }
+      } else {
+        const res = await votePetition(id);
+        if (res.success) {
+          setHasVoted(true);
+          setPetition((prev) => ({
+            ...prev,
+            voteCount: res.voteCount,
+            signatureCount: res.signatureCount
+          }));
+          setMsg('Thank you! Your vote has been recorded.');
+        }
       }
     } catch (err) {
-      setError(err.message || 'Could not record signature');
+      setError(err.message || 'Could not update vote');
     } finally {
-      setSigning(false);
-    }
-  };
-
-  // Revoke Digital Signature handler
-  const handleRevokeSignature = async () => {
-    if (!window.confirm('Are you sure you want to withdraw your digital signature from this petition?')) return;
-
-    setRevoking(true);
-    setError('');
-    setMsg('');
-
-    try {
-      const res = await revokeSignature(id);
-      if (res.success) {
-        setHasSigned(false);
-        setSignatureInfo(null);
-        setPetition((prev) => ({
-          ...prev,
-          signatureCount: res.signatureCount
-        }));
-        setMsg('Your digital signature has been successfully withdrawn/revoked.');
-      }
-    } catch (err) {
-      setError(err.message || 'Could not revoke signature');
-    } finally {
-      setRevoking(false);
+      setVoting(false);
     }
   };
 
@@ -163,9 +139,11 @@ const PetitionDetailsPage = () => {
     );
   }
 
-  const isGoalReached = petition.signatureCount >= petition.targetSignatures;
+  const currentVotes = petition.voteCount ?? petition.signatureCount ?? 0;
+  const targetGoal = petition.targetVotes ?? petition.targetSignatures ?? 5;
+  const isGoalReached = currentVotes >= targetGoal;
   const isSubmittedToGov = petition.status === 'submitted_to_government' || petition.pushedToGovernment;
-  const percentage = Math.min(100, Math.round((petition.signatureCount / petition.targetSignatures) * 100));
+  const percentage = Math.min(100, Math.round((currentVotes / targetGoal) * 100));
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8 space-y-6">
@@ -238,10 +216,10 @@ const PetitionDetailsPage = () => {
           <div className="bg-gradient-to-r from-amber-50 to-orange-50 border-2 border-orange-300 rounded-2xl p-6 space-y-3">
             <div className="flex items-center space-x-2 text-[#0F172A] font-extrabold text-base">
               <Sparkles className="w-5 h-5 text-[#F97316]" />
-              <span>🎯 Signature Goal Reached! (100% Target Met)</span>
+              <span>🎯 Vote Goal Reached! (100% Target Met)</span>
             </div>
             <p className="text-xs text-[#64748B] leading-relaxed">
-              All required signatures have been collected and digitally verified. You can now formally submit this petition to the relevant Government Department.
+              All required votes have been collected. You can now formally submit this petition to the relevant Government Department.
             </p>
             <button
               onClick={handlePushToGovernment}
@@ -254,11 +232,12 @@ const PetitionDetailsPage = () => {
           </div>
         )}
 
-        {/* Signature Goal & Digital Signature Action Box */}
+        {/* Vote Goal & 1-Click Vote Action Box */}
         <div className="bg-slate-50 p-6 border border-[#E2E8F0] rounded-2xl space-y-4 pt-4">
           <div className="flex justify-between items-center text-xs font-bold text-[#0F172A]">
-            <span className="text-sm">
-              {petition.signatureCount} signed of {petition.targetSignatures} goal
+            <span className="text-sm flex items-center space-x-1">
+              <Users className="w-4 h-4 text-[#2563EB] inline mr-1" />
+              {currentVotes} votes of {targetGoal} goal
             </span>
             <span className="text-[#2563EB] font-extrabold text-sm">{percentage}%</span>
           </div>
@@ -269,65 +248,33 @@ const PetitionDetailsPage = () => {
 
           {msg && <div className="p-3 bg-emerald-50 text-emerald-800 text-xs font-semibold rounded-xl">{msg}</div>}
 
-          {/* Verified Digital Signature Certificate */}
-          {hasSigned ? (
-            <div className="bg-emerald-50 border-2 border-emerald-200 rounded-2xl p-5 space-y-3 text-xs text-emerald-950">
-              <div className="flex items-center justify-between font-bold text-emerald-900">
-                <div className="flex items-center space-x-1.5">
-                  <ShieldCheck className="w-4 h-4 text-emerald-600" />
-                  <span>✓ Verified Digital Signature Recorded</span>
-                </div>
-                <button
-                  onClick={handleRevokeSignature}
-                  disabled={revoking}
-                  className="px-3 py-1 bg-red-100 hover:bg-red-200 text-red-700 rounded-lg text-xs font-bold transition flex items-center space-x-1"
-                >
-                  <RotateCcw className="w-3 h-3" />
-                  <span>{revoking ? 'Revoking...' : 'Revoke Signature'}</span>
-                </button>
-              </div>
-
-              <div className="text-slate-700">
-                Signer Name: <strong>{signatureInfo?.signerName || user?.name}</strong>
-              </div>
-
-              {signatureInfo?.signatureData && (
-                <div className="pt-2">
-                  <div className="text-[10px] text-slate-400 uppercase font-bold mb-1">Digital Signature Stamp:</div>
-                  {signatureInfo.signatureData.startsWith('TYPED:') ? (
-                    <div className="font-serif italic text-2xl text-blue-900 font-bold tracking-wider py-2 px-4 bg-white rounded-lg border border-emerald-200 inline-block">
-                      {signatureInfo.signatureData.replace('TYPED:', '')}
-                    </div>
-                  ) : (
-                    <div className="bg-white p-2 border border-emerald-200 rounded-lg inline-block">
-                      <img src={signatureInfo.signatureData} alt="Digital Signature" className="h-12 object-contain" />
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-          ) : (
-            <button
-              onClick={handleOpenSigModal}
-              disabled={signing || petition.status === 'rejected'}
-              className="w-full py-3.5 bg-[#F97316] hover:bg-[#ea580c] text-white font-bold rounded-xl text-sm shadow-md transition flex items-center justify-center space-x-2"
-            >
-              <PenTool className="w-4 h-4" />
-              <span>Sign Petition with Digital Signature</span>
-            </button>
-          )}
+          {/* 1-Click Vote Button */}
+          <div className="pt-2">
+            {hasVoted ? (
+              <button
+                onClick={handleToggleVote}
+                disabled={voting}
+                className="w-full py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-sm shadow-md transition flex items-center justify-center space-x-2"
+              >
+                <CheckCircle2 className="w-5 h-5 text-white" />
+                <span>{voting ? 'Updating Vote...' : '✓ You Voted for This Petition (Click to Remove)'}</span>
+              </button>
+            ) : (
+              <button
+                onClick={handleToggleVote}
+                disabled={voting || petition.status === 'rejected'}
+                className="w-full py-3.5 bg-[#F97316] hover:bg-[#ea580c] text-white font-bold rounded-xl text-sm shadow-md transition flex items-center justify-center space-x-2"
+              >
+                <ThumbsUp className="w-5 h-5" />
+                <span>{voting ? 'Recording Vote...' : '👍 Upvote This Petition'}</span>
+              </button>
+            )}
+          </div>
         </div>
       </div>
-
-      {/* Digital Signature Pad Modal */}
-      <DigitalSignatureModal
-        isOpen={showSigModal}
-        onClose={() => setShowSigModal(false)}
-        onSubmit={handleDigitalSignatureSubmit}
-        defaultName={user?.name || ''}
-      />
     </div>
   );
 };
 
 export default PetitionDetailsPage;
+

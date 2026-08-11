@@ -145,7 +145,7 @@ const CreatePetitionPage = () => {
           </div>
 
           <div>
-            <label className="block font-bold uppercase tracking-wider text-slate-700 mb-1">Target Signatures *</label>
+            <label className="block font-bold uppercase tracking-wider text-slate-700 mb-1">Target Votes *</label>
             <input
               name="targetSignatures"
               type="number"
@@ -156,7 +156,7 @@ const CreatePetitionPage = () => {
               placeholder="e.g. 100"
               className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#2563EB]"
             />
-            <span className="text-[11px] text-[#64748B] mt-1 block">Minimum 5 signatures required.</span>
+            <span className="text-[11px] text-[#64748B] mt-1 block">Minimum 5 votes required.</span>
           </div>
         </div>
 

@@ -61,9 +61,9 @@ const PetitionSuccessPage = () => {
     );
   }
 
-  const targetGoal = petition.targetSignatures || 5;
-  const currentSigs = petition.signatureCount || 0;
-  const percentage = Math.min(100, Math.round((currentSigs / targetGoal) * 100));
+  const targetGoal = petition.targetVotes ?? petition.targetSignatures ?? 5;
+  const currentVotes = petition.voteCount ?? petition.signatureCount ?? 0;
+  const percentage = Math.min(100, Math.round((currentVotes / targetGoal) * 100));
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-12">
@@ -84,10 +84,10 @@ const PetitionSuccessPage = () => {
               {user?.name ? user.name.split(' ')[0] : 'Citizen'}, your petition is live!
             </h1>
             <p className="text-lg font-bold text-slate-800">
-              Share it now to get your first <span className="font-extrabold text-slate-900">{targetGoal} signatures</span>.
+              Share it now to get your first <span className="font-extrabold text-slate-900">{targetGoal} votes</span>.
             </p>
             <p className="text-xs text-slate-500 max-w-lg leading-relaxed">
-              Get {targetGoal} signatures to make your petition eligible for site-wide search. You can keep editing it until then.
+              Get {targetGoal} votes to make your petition eligible for site-wide search. You can keep editing it until then.
             </p>
           </div>
 
@@ -241,7 +241,7 @@ const PetitionSuccessPage = () => {
               <div className="space-y-1.5">
                 <div className="flex justify-between items-center text-xs text-slate-700">
                   <span className="font-bold">
-                    {currentSigs} of {targetGoal} signatures
+                    {currentVotes} of {targetGoal} votes
                   </span>
                   <span className="font-extrabold text-slate-900">{percentage}%</span>
                 </div>
@@ -256,7 +256,7 @@ const PetitionSuccessPage = () => {
               {/* Lock callout */}
               <div className="flex items-center space-x-2 text-xs font-medium text-slate-700 bg-slate-50 p-3 rounded-xl border border-slate-100">
                 <Lock className="w-4 h-4 text-slate-500 flex-shrink-0" />
-                <span>Get {targetGoal} signatures to unlock site-wide search.</span>
+                <span>Get {targetGoal} votes to unlock site-wide search.</span>
               </div>
 
               {/* Snippet Description */}

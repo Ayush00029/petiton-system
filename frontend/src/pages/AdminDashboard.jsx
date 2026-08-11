@@ -86,7 +86,7 @@ const AdminDashboard = () => {
                   <th className="p-3.5">Category</th>
                   <th className="p-3.5">Location</th>
                   <th className="p-3.5">Creator</th>
-                  <th className="p-3.5">Signatures</th>
+                  <th className="p-3.5">Votes</th>
                   <th className="p-3.5">Status</th>
                   <th className="p-3.5 text-right">Actions</th>
                 </tr>
@@ -103,7 +103,7 @@ const AdminDashboard = () => {
                     <td className="p-3.5 text-slate-600">{p.location}</td>
                     <td className="p-3.5 text-slate-600">{p.createdBy?.name || 'Citizen'}</td>
                     <td className="p-3.5 font-bold text-[#0F172A]">
-                      {p.signatureCount} / {p.targetSignatures}
+                      {p.voteCount ?? p.signatureCount ?? 0} / {p.targetVotes ?? p.targetSignatures ?? 100}
                     </td>
                     <td className="p-3.5">
                       <PetitionStatusBadge status={p.status} />

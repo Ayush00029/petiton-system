@@ -10,7 +10,7 @@ const {
     updatePetitionStatusAdmin,
     deletePetitionAdmin
 } = require("../controllers/petitionController");
-const { signPetition, revokeSignature, checkSignatureStatus } = require("../controllers/signatureController");
+const { votePetition, unvotePetition, checkVoteStatus } = require("../controllers/voteController");
 const { protect } = require("../middleware/authMiddleware");
 const { authorize } = require("../middleware/roleMiddleware");
 
@@ -21,10 +21,16 @@ router.get("/:id", getPetitionById);
 // Protected Citizen Routes
 router.post("/", protect, createPetition);
 router.get("/user/my", protect, getMyPetitions);
-router.post("/:id/sign", protect, signPetition);
-router.delete("/:id/sign", protect, revokeSignature);
+router.post("/:id/vote", protect, votePetition);
+router.delete("/:id/vote", protect, unvotePetition);
+router.get("/:id/vote-status", protect, checkVoteStatus);
+
+// Backward Compatibility Aliases for Frontend/Tests
+router.post("/:id/sign", protect, votePetition);
+router.delete("/:id/sign", protect, unvotePetition);
+router.get("/:id/signed", protect, checkVoteStatus);
+
 router.post("/:id/push-to-government", protect, pushToGovernment);
-router.get("/:id/signed", protect, checkSignatureStatus);
 
 // Protected Admin Routes
 router.get("/admin/all", protect, authorize("admin"), getAllPetitionsAdmin);

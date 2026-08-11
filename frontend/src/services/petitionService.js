@@ -20,24 +20,29 @@ export const getMyPetitions = async () => {
   return await API.get('/petitions/user/my');
 };
 
-// Citizen: Sign petition with digital signature
-export const signPetition = async (id, signatureData) => {
-  return await API.post(`/petitions/${id}/sign`, signatureData);
+// Citizen: Upvote / Vote for petition (1-click)
+export const votePetition = async (id) => {
+  return await API.post(`/petitions/${id}/vote`);
 };
 
-// Citizen: Revoke/Withdraw digital signature
-export const revokeSignature = async (id) => {
-  return await API.delete(`/petitions/${id}/sign`);
+// Citizen: Revoke/Withdraw vote
+export const unvotePetition = async (id) => {
+  return await API.delete(`/petitions/${id}/vote`);
 };
+
+// Citizen: Check if user has voted
+export const checkVoteStatus = async (id) => {
+  return await API.get(`/petitions/${id}/vote-status`);
+};
+
+// Backward-compatible aliases
+export const signPetition = votePetition;
+export const revokeSignature = unvotePetition;
+export const checkSignatureStatus = checkVoteStatus;
 
 // Protected: Push petition to Government Department when goal is hit
 export const pushToGovernment = async (id) => {
   return await API.post(`/petitions/${id}/push-to-government`);
-};
-
-// Citizen: Check if user has signed
-export const checkSignatureStatus = async (id) => {
-  return await API.get(`/petitions/${id}/signed`);
 };
 
 // Admin: Get all petitions (pending, approved, rejected, submitted_to_government)
