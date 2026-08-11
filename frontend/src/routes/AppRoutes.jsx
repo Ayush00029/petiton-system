@@ -4,7 +4,6 @@ import ProtectedRoute from './ProtectedRoute';
 import LandingPage from '../pages/LandingPage';
 import LoginPage from '../pages/LoginPage';
 import RegisterPage from '../pages/RegisterPage';
-import VerifyOtpPage from '../pages/VerifyOtpPage';
 import PetitionsPage from '../pages/PetitionsPage';
 import PetitionDetailsPage from '../pages/PetitionDetailsPage';
 import PetitionSuccessPage from '../pages/PetitionSuccessPage';
@@ -19,7 +18,6 @@ const AppRoutes = () => {
       <Route path="/" element={<LandingPage />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
-      <Route path="/verify-otp" element={<VerifyOtpPage />} />
       <Route path="/petitions" element={<PetitionsPage />} />
       <Route path="/petitions/:id" element={<PetitionDetailsPage />} />
       <Route path="/petitions/:id/success" element={<PetitionSuccessPage />} />

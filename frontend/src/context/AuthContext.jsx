@@ -43,7 +43,11 @@ export const AuthProvider = ({ children }) => {
   };
 
   const register = async (userData) => {
-    return await registerUser(userData);
+    const res = await registerUser(userData);
+    if (res.success && res.data?.token) {
+      setUser(res.data);
+    }
+    return res;
   };
 
   const setUserState = (userData) => {

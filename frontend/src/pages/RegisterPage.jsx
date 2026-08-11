@@ -23,7 +23,7 @@ const RegisterPage = () => {
     try {
       const res = await register(formData);
       if (res.success) {
-        navigate('/verify-otp', { state: { email: res.email, otpDev: res.otpDev } });
+        navigate('/petitions');
       }
     } catch (err) {
       setError(err.message || 'Registration failed');
@@ -86,7 +86,7 @@ const RegisterPage = () => {
             disabled={loading}
             className="w-full py-3 bg-[#F97316] hover:bg-[#ea580c] text-white font-bold rounded-xl text-sm transition-all duration-150 shadow-md disabled:opacity-50"
           >
-            {loading ? 'Sending verification code...' : 'Register Account'}
+            {loading ? 'Creating Account...' : 'Register Account'}
           </button>
         </form>
 

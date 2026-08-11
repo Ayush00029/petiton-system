@@ -24,13 +24,7 @@ const userSchema = new mongoose.Schema(
         },
         isEmailVerified: {
             type: Boolean,
-            default: false
-        },
-        emailOtp: {
-            type: String
-        },
-        otpExpire: {
-            type: Date
+            default: true
         }
     },
     {

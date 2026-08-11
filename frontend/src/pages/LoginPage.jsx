@@ -23,9 +23,7 @@ const LoginPage = () => {
     try {
       const res = await login(formData);
       if (res.success) {
-        if (res.requiresVerification) {
-          navigate('/verify-otp', { state: { email: res.email, otpDev: res.otpDev } });
-        } else if (res.data?.role === 'admin') {
+        if (res.data?.role === 'admin') {
           navigate('/admin');
         } else {
           navigate('/petitions');
@@ -98,7 +96,7 @@ const LoginPage = () => {
             disabled={loading}
             className="w-full py-3 bg-[#F97316] hover:bg-[#ea580c] text-white font-bold rounded-xl text-sm transition-all duration-150 shadow-md disabled:opacity-50"
           >
-            {loading ? 'Sending verification code...' : 'Sign In'}
+            {loading ? 'Signing In...' : 'Sign In'}
           </button>
         </form>
 
