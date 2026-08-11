@@ -23,7 +23,7 @@ const CreatePetitionPage = () => {
     description: '',
     category: 'Roads',
     location: '',
-    targetSignatures: 100
+    targetVotes: 100
   });
 
   const [aiLoading, setAiLoading] = useState(false);
@@ -60,8 +60,8 @@ const CreatePetitionPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (Number(formData.targetSignatures) < 5) {
-      setError('Target signatures must be at least 5 for a civic petition.');
+    if (Number(formData.targetVotes) < 5) {
+      setError('Target votes must be at least 5 for a civic petition.');
       return;
     }
 
@@ -147,11 +147,11 @@ const CreatePetitionPage = () => {
           <div>
             <label className="block font-bold uppercase tracking-wider text-slate-700 mb-1">Target Votes *</label>
             <input
-              name="targetSignatures"
+              name="targetVotes"
               type="number"
               min={5}
               required
-              value={formData.targetSignatures}
+              value={formData.targetVotes}
               onChange={handleChange}
               placeholder="e.g. 100"
               className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#2563EB]"
