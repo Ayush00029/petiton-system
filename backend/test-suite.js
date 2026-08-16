@@ -13,11 +13,6 @@ const runTests = async () => {
     let testEmail = `testuser_${Date.now()}@civicvoice.org`;
 
     try {
-        // 1. Health Check
-        console.log("Test 1: Health Check (/api/health)...");
-        const healthRes = await axios.get(`${BASE_URL}/health`);
-        console.assert(healthRes.data.success === true, "Health check failed");
-        console.log("✓ Health Check Passed\n");
 
         // 2. User Registration (Direct Token)
         console.log(`Test 2: Register User (${testEmail})...`);

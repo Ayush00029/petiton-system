@@ -1,10 +1,5 @@
 const User = require("../models/User");
-const jwt = require("jsonwebtoken");
-
-// Generate JWT token helper
-const generateToken = (id) => {
-    return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: "30d" });
-};
+const generateToken = require("../utils/generateToken");
 
 // Register User (Direct registration without email OTP)
 const registerUser = async (req, res) => {
