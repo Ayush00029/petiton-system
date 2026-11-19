@@ -17,6 +17,7 @@ app.use(express.json());
 // Routes
 app.use("/api/auth", require("./routes/authRoutes"));
 app.use("/api/petitions", require("./routes/petitionRoutes"));
+app.use("/api/ai", require("./routes/aiRoutes"));
 // Root route for simple deployment checks
 app.get("/", (req, res) => {
     res.send("Petition System API Server is running");
